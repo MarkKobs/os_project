@@ -7,22 +7,23 @@
  * 2.priority_queue based on max_heap(binary heap)
 
  * functions:
- * 1(1)initialize
- * 1(2)lessen
- * 2(1)initialize by inserting
- * 2(2)insert
- * 2(3)delete(remaining)
- * main(imitating process schedualing in modern computer)
+ * 1.1 initialize
+ * 1.2 lessen
+ * 2.1 initialize by inserting
+ * 2.2 insert
+ * 2.3 delete(remaining)
+ * main (imitating process schedualing in modern computer)
  */
 #include<stdio.h>
 #include<stdlib.h>
 //declaration
-void heap_insert();
 typedef struct PCB PCB;
 typedef struct max_heap *priority_queue;
 PCB initialize_pcb(PCB* const pcb,int id,int requireTime,int priority,char state);
+void heap_insert(priority_queue const H,int id,int requireTime,int priority,char state);
 priority_queue initialize_queue(int element_length);
 void pcb_lessen(PCB * const pcb);
+int isFull(priority_queue const H);
 struct PCB{
     int p_id;
     int p_requireTime;
@@ -61,6 +62,30 @@ priority_queue initialize_queue(int element_length){
         H->pcb_array[0]=initialize_pcb(&H->pcb_array[0],0,0,0,' ');
         return H;
 }
+int isFull(priority_queue const H){// 1 full, 0 not full
+        if(H->size==H->capacity){
+                return 1;
+        }
+        return 0;
+}
+void heap_insert(priority_queue const H,int id,int requireTime,int priority,char state){
+        int i;
+        if(isFull(H)){
+                printf("Queue is full,\n");
+                return;
+        }
+        for(i=++H->size;H->pcb_array[i/2].p_priority>priority;i/=2){//change the place of the tree.
+                //and the H->size increase
+                H->pcb_array[i]=H->pcb_array[i/2];
+        }
+        //find the right place , current i is the right place to store input pcb information.
+        H->pcb_array[i].p_id=id;
+        H->pcb_array[i].p_requireTime=requireTime;
+        H->pcb_array[i].p_priority=priority;
+        H->pcb_array[i].p_state=state;
+        
+        //change some heap information. (has done , the size has been increased.)
+}
 void pcb_lessen(PCB * const pcb){
         if(pcb==NULL){
                 printf("Null Pcb* , Lessen Error! \n");
@@ -80,9 +105,11 @@ void pcb_lessen(PCB * const pcb){
                 }
         }
 }
+
 int main(){
         priority_queue p=initialize_queue(5);
         printf("%d",p->pcb_array[0].p_id);
+
         pcb_lessen(&p->pcb_array[0]);
         return 0;
 }
