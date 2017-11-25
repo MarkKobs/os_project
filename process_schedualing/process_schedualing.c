@@ -16,8 +16,13 @@
  */
 #include<stdio.h>
 #include<stdlib.h>
+//declaration
+void heap_insert();
 typedef struct PCB PCB;
 typedef struct max_heap *priority_queue;
+PCB initialize_pcb(PCB* const pcb,int id,int requireTime,int priority,char state);
+priority_queue initialize_queue(int element_length);
+void pcb_lessen(PCB * const pcb);
 struct PCB{
     int p_id;
     int p_requireTime;
@@ -54,11 +59,30 @@ priority_queue initialize_queue(int element_length){
         H->capacity=element_length;
         H->size=0;
         H->pcb_array[0]=initialize_pcb(&H->pcb_array[0],0,0,0,' ');
-        printf("%d\n",H->pcb_array[0].p_requireTime);
+        return H;
+}
+void pcb_lessen(PCB * const pcb){
+        if(pcb==NULL){
+                printf("Null Pcb* , Lessen Error! \n");
+        }
+        else{
+                if(pcb->p_requireTime==0){
+                        printf("P%d\'s state is \'End\'\n",pcb->p_id);
+                }
+                else{//requireTime>0
+                        pcb->p_requireTime-=1;
+                        pcb->p_priority-=1;
+                        printf("P%d lessen successfully,current requireTime:%d , priority:%d\n",pcb->p_id,pcb->p_requireTime,pcb->p_priority);
+                        if(pcb->p_requireTime==0){
+                         //       pcb->p_state='E';
+                                printf("P%d\'s state changed to \'End\'\n",pcb->p_id);
+                        }
+                }
+        }
 }
 int main(){
-        //PCB *p=initialize_pcb(0,0,0,' ');
-       // printf("%d",p->p_id);
-       priority_queue p=initialize_queue(5);
+        priority_queue p=initialize_queue(5);
+        printf("%d",p->pcb_array[0].p_id);
+        pcb_lessen(&p->pcb_array[0]);
         return 0;
 }
