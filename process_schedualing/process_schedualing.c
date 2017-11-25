@@ -16,6 +16,20 @@
  */
 #include<stdio.h>
 #include<stdlib.h>
+typedef struct PCB PCB;
+typedef struct max_heap *priority_queue;
+struct PCB{
+    int p_id;
+    int p_requireTime;
+    int p_priority;
+    char state;//E:end,R:ready
+};
+
+struct max_heap{
+        int heap_capacity;
+        int size;
+        PCB *pcb_array;
+};
 int main(){
         return 0;
 }
