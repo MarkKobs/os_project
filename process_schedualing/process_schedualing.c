@@ -14,6 +14,7 @@
  * 2.3 delete(remaining)
  * main (imitating process schedualing in modern computer)
  */
+#include<limits.h>
 #include<stdio.h>
 #include<stdlib.h>
 //declaration
@@ -24,6 +25,10 @@ void heap_insert(priority_queue const H,int id,int requireTime,int priority,char
 priority_queue initialize_queue(int element_length);
 void pcb_lessen(PCB * const pcb);
 int isFull(priority_queue const H);
+void init_heap_data(priority_queue const H);//put the pcb data into heap by inserting
+void pcb_print(int id,int requireTime,int priority,char state);
+void heap_print(priority_queue const H);
+int isEmpty(priority_queue const H);
 struct PCB{
     int p_id;
     int p_requireTime;
@@ -59,11 +64,17 @@ priority_queue initialize_queue(int element_length){
         }
         H->capacity=element_length;
         H->size=0;
-        H->pcb_array[0]=initialize_pcb(&H->pcb_array[0],0,0,0,' ');
+        H->pcb_array[0]=initialize_pcb(&H->pcb_array[0],0,INT_MAX,INT_MAX,' ');
         return H;
 }
 int isFull(priority_queue const H){// 1 full, 0 not full
         if(H->size==H->capacity){
+                return 1;
+        }
+        return 0;
+}
+int isEmpty(priority_queue const H){//1 empty,0 not empty
+        if(H->size==0){
                 return 1;
         }
         return 0;
@@ -74,7 +85,8 @@ void heap_insert(priority_queue const H,int id,int requireTime,int priority,char
                 printf("Queue is full,\n");
                 return;
         }
-        for(i=++H->size;H->pcb_array[i/2].p_priority>priority;i/=2){//change the place of the tree.
+        //up overflow
+        for(i=++H->size;H->pcb_array[i/2].p_priority<priority;i/=2){//change the place of the tree. 
                 //and the H->size increase
                 H->pcb_array[i]=H->pcb_array[i/2];
         }
@@ -82,9 +94,43 @@ void heap_insert(priority_queue const H,int id,int requireTime,int priority,char
         H->pcb_array[i].p_id=id;
         H->pcb_array[i].p_requireTime=requireTime;
         H->pcb_array[i].p_priority=priority;
-        H->pcb_array[i].p_state=state;
-        
+        H->pcb_array[i].p_state=state; 
         //change some heap information. (has done , the size has been increased.)
+}
+
+void init_heap_data(priority_queue const H){
+//put the pcb data into heap by inserting
+        int id[5];
+        int requireTime[5];
+        int priority[5];
+        char state[5];
+        printf("Initialize the information of five pcb...\n");
+        for(int i=0;i<5;i++){
+                printf("%d-Enter process Id,requiretime,priority,state: \n",(i+1));
+                scanf("%d %d %d %c",&id[i],&requireTime[i],&priority[i],&state[i]);
+                heap_insert(H,id[i],requireTime[i],priority[i],state[i]);
+        }
+        printf("Initialized - -!\n");
+                /*
+        for(int i=0;i<5;i++){
+                pcb_print(id[i],requireTime[i],priority[i],state[i]);}*/
+
+        heap_print(H);
+        
+}
+void heap_print(priority_queue const H){
+        if(isEmpty(H)){
+                printf("the heap is Empty,Error.\n");
+                return;
+        }
+        
+        for(int i=1;i<=H->size;i++){
+                printf("P%d: requiretime %d,priority %d,state %c.\n",H->pcb_array[i].p_id, H->pcb_array[i].p_requireTime,H->pcb_array[i].p_priority,H->pcb_array[i].p_state);
+        }
+
+}
+void pcb_print(int id, int requireTime,int priority,char state){
+        printf("P%d:requiretime %d,priority %d,state %c\n",id,requireTime,priority,state);
 }
 void pcb_lessen(PCB * const pcb){
         if(pcb==NULL){
@@ -107,9 +153,10 @@ void pcb_lessen(PCB * const pcb){
 }
 
 int main(){
-        priority_queue p=initialize_queue(5);
-        printf("%d",p->pcb_array[0].p_id);
-
-        pcb_lessen(&p->pcb_array[0]);
+        priority_queue queue=initialize_queue(5);
+     //   printf("%d",queue->pcb_array[0].p_id);
+     //   heap_insert(queue,1,3,2,'R');
+     //   pcb_lessen(&queue->pcb_array[1]);
+        init_heap_data(queue);
         return 0;
 }
