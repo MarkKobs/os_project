@@ -14,10 +14,12 @@
  * 2.3 delete(remaining)
  * main (imitating process schedualing in modern computer)
  */
+
 #include<unistd.h>//use usleep
 #include<limits.h>//use MAX_INT
 #include<stdio.h>
 #include<stdlib.h>
+
 //declaration
 typedef struct PCB PCB;
 typedef struct max_heap *priority_queue;
@@ -33,6 +35,8 @@ int isEmpty(priority_queue const H);
 void percolateDown(priority_queue const H,int i);
 void reconstruct_heap(priority_queue const H);
 void pcb_swap(PCB *p1,PCB *p2);
+void delete_pcb(priority_queue const H);
+
 struct PCB{
     int p_id;
     int p_requireTime;
@@ -45,6 +49,7 @@ struct max_heap{
         int size;
         PCB *pcb_array;
 };
+
 PCB initialize_pcb(PCB* const pcb,int id,int requireTime,int priority,char state){
     //PCB* pcb=malloc(sizeof(struct PCB));
     pcb->p_id=id;
@@ -53,6 +58,7 @@ PCB initialize_pcb(PCB* const pcb,int id,int requireTime,int priority,char state
     pcb->p_state=state;
     return *pcb;
 }
+
 priority_queue initialize_queue(int element_length){
         priority_queue H;
         if(element_length<=0){
@@ -71,18 +77,21 @@ priority_queue initialize_queue(int element_length){
         H->pcb_array[0]=initialize_pcb(&H->pcb_array[0],0,INT_MAX,INT_MAX,' ');
         return H;
 }
+
 int isFull(priority_queue const H){// 1 full, 0 not full
         if(H->size==H->capacity){
                 return 1;
         }
         return 0;
 }
+
 int isEmpty(priority_queue const H){//1 empty,0 not empty
         if(H->size==0){
                 return 1;
         }
         return 0;
 }
+
 void heap_insert(priority_queue const H,int id,int requireTime,int priority,char state){
         int i;
         if(isFull(H)){
@@ -122,6 +131,7 @@ void init_heap_data(priority_queue const H){
         heap_print(H);
         
 }
+
 void heap_print(priority_queue const H){
         if(isEmpty(H)){
                 printf("the heap is Empty,Error.\n");
@@ -133,9 +143,11 @@ void heap_print(priority_queue const H){
         }
 
 }
+
 void pcb_print(int id, int requireTime,int priority,char state){
         printf("P%d:requiretime %d,priority %d,state %c\n",id,requireTime,priority,state);
 }
+
 void pcb_lessen(PCB * const pcb){
         if(pcb==NULL){
                 printf("Null Pcb* , Lessen Error! \n");
@@ -162,13 +174,14 @@ void reconstruct_heap(priority_queue const H){
         }
         heap_print(H);
 }
+
 void percolateDown(priority_queue const H,int i){
         int r=i;//root:subscript of the root of subtree where the process will begin
         int c=2*r;//c:subscript of the left child
        // int right_child=2*i+1;
        // int big_child=(H->pcb_array[left_child].p_priority>H->pcb_array[right_child].p_priority)?left_child:right_child;
         int n=H->size;
-        while(c<n){
+        while(c<=n){
                 if(c<n-1 && H->pcb_array[c].p_priority<H->pcb_array[c+1].p_priority){
                         c++;
                 }
@@ -190,6 +203,7 @@ void pcb_swap(PCB *p1,PCB *p2){
                 printf("out of space!\n");
                 return;
         }
+        /*
         temp->p_id=p1->p_id;
         temp->p_requireTime=p1->p_requireTime;
         temp->p_priority=p1->p_priority;
@@ -204,6 +218,36 @@ void pcb_swap(PCB *p1,PCB *p2){
         p2->p_requireTime=temp->p_requireTime;
         p2->p_priority=temp->p_priority;
         p2->p_state=temp->p_state;
+        */
+        /*Simpler*/
+        *temp=*p1;
+        *p1=*p2;
+        *p2=*temp;
+}
+
+void delete_pcb(priority_queue H){
+        int i,c;//c:child
+        /*last pcb  h->size--*/
+        PCB* last_pcb=&H->pcb_array[H->size--];
+        if(isEmpty(H)){
+                printf("Error,the priority queue is empty!\n");
+                return;
+        }
+        for(i=1;i*2<=H->size;i=c){
+                /*find larger child*/
+                c=i*2;//left child
+                if(c!=H->size && H->pcb_array[c].p_priority<H->pcb_array[c+1].p_priority){
+                        c++;
+                }
+                /*percolate one level*/
+                if(last_pcb->p_priority<H->pcb_array[c].p_priority){//TODO
+                        H->pcb_array[i]=H->pcb_array[c];
+                }
+                else {
+                        break;
+                }
+        }
+        H->pcb_array[i]=*last_pcb;
 }
 int main(){
         priority_queue queue=initialize_queue(5);
