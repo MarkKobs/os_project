@@ -225,12 +225,12 @@ void pcb_swap(PCB *p1,PCB *p2){
         *p2=*temp;
 }
 
-void delete_pcb(priority_queue H){
+void delete_pcb(priority_queue const  H){
         int i,c;//c:child
         /*last pcb  h->size--*/
-        PCB* last_pcb=&H->pcb_array[H->size--];
+        PCB last_pcb=H->pcb_array[H->size--];
         if(isEmpty(H)){
-                printf("Error,the priority queue is empty!\n");
+                printf("the priority queue is empty!\n");
                 return;
         }
         for(i=1;i*2<=H->size;i=c){
@@ -240,20 +240,21 @@ void delete_pcb(priority_queue H){
                         c++;
                 }
                 /*percolate one level*/
-                if(last_pcb->p_priority<H->pcb_array[c].p_priority){//TODO
+                if(last_pcb.p_priority<H->pcb_array[c].p_priority){//TODO
                         H->pcb_array[i]=H->pcb_array[c];
                 }
                 else {
                         break;
                 }
         }
-        H->pcb_array[i]=*last_pcb;
+        H->pcb_array[i]=last_pcb;
+        printf("delete ! size : %d--->%d\n",H->size+1,H->size);
 }
 int main(){
         priority_queue queue=initialize_queue(5);
         init_heap_data(queue);
         PCB *pcb_toRun=&queue->pcb_array[1];//get the next PCB to run, always get the one with biggest priority(pcb_array[1])
-        while(pcb_toRun->p_requireTime!=0){
+        while(queue->size!=0){
                 //run
                 usleep(3000);
                 pcb_lessen(pcb_toRun);
@@ -262,6 +263,9 @@ int main(){
                 reconstruct_heap(queue);
                // pcb_toRun=&queue->pcb_array[1];
                 pcb_toRun=&queue->pcb_array[1];
+                if(pcb_toRun->p_requireTime==0){
+                        delete_pcb(queue);
+                }
         }
         return 0;
 }
