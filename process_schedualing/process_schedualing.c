@@ -14,7 +14,8 @@
  * 2.3 delete(remaining)
  * main (imitating process schedualing in modern computer)
  */
-#include<limits.h>
+#include<unistd.h>//use usleep
+#include<limits.h>//use MAX_INT
 #include<stdio.h>
 #include<stdlib.h>
 //declaration
@@ -29,6 +30,9 @@ void init_heap_data(priority_queue const H);//put the pcb data into heap by inse
 void pcb_print(int id,int requireTime,int priority,char state);
 void heap_print(priority_queue const H);
 int isEmpty(priority_queue const H);
+void percolateDown(priority_queue const H,int i);
+void reconstruct_heap(priority_queue const H);
+void pcb_swap(PCB *p1,PCB *p2);
 struct PCB{
     int p_id;
     int p_requireTime;
@@ -100,19 +104,19 @@ void heap_insert(priority_queue const H,int id,int requireTime,int priority,char
 
 void init_heap_data(priority_queue const H){
 //put the pcb data into heap by inserting
-        int id[5];
-        int requireTime[5];
-        int priority[5];
-        char state[5];
-        printf("Initialize the information of five pcb...\n");
-        for(int i=0;i<5;i++){
+        int id[H->capacity];
+        int requireTime[H->capacity];
+        int priority[H->capacity];
+        char state[H->capacity];
+        printf("Initialize the information of pcbs...\n");
+        for(int i=0;i<H->capacity;i++){
                 printf("%d-Enter process Id,requiretime,priority,state: \n",(i+1));
                 scanf("%d %d %d %c",&id[i],&requireTime[i],&priority[i],&state[i]);
                 heap_insert(H,id[i],requireTime[i],priority[i],state[i]);
         }
         printf("Initialized - -!\n");
                 /*
-        for(int i=0;i<5;i++){
+        for(int i=0;i<H->capacity;i++){
                 pcb_print(id[i],requireTime[i],priority[i],state[i]);}*/
 
         heap_print(H);
@@ -141,22 +145,79 @@ void pcb_lessen(PCB * const pcb){
                         printf("P%d\'s state is \'End\'\n",pcb->p_id);
                 }
                 else{//requireTime>0
-                        pcb->p_requireTime-=1;
-                        pcb->p_priority-=1;
+                        pcb->p_requireTime--;
+                        pcb->p_priority--;
                         printf("P%d lessen successfully,current requireTime:%d , priority:%d\n",pcb->p_id,pcb->p_requireTime,pcb->p_priority);
                         if(pcb->p_requireTime==0){
-                         //       pcb->p_state='E';
+                                pcb->p_state='E';
                                 printf("P%d\'s state changed to \'End\'\n",pcb->p_id);
                         }
                 }
         }
 }
 
+void reconstruct_heap(priority_queue const H){
+        for(int i=H->size/2;i>0;i--){//important : i>0 not i>=0
+                percolateDown(H,i);//find if there are bigger ones in child nodes.
+        }
+        heap_print(H);
+}
+void percolateDown(priority_queue const H,int i){
+        int r=i;//root:subscript of the root of subtree where the process will begin
+        int c=2*r;//c:subscript of the left child
+       // int right_child=2*i+1;
+       // int big_child=(H->pcb_array[left_child].p_priority>H->pcb_array[right_child].p_priority)?left_child:right_child;
+        int n=H->size;
+        while(c<n){
+                if(c<n-1 && H->pcb_array[c].p_priority<H->pcb_array[c+1].p_priority){
+                        c++;
+                }
+                if(H->pcb_array[r].p_priority<H->pcb_array[c].p_priority){
+                        pcb_swap(&H->pcb_array[r],&H->pcb_array[c]);//swap r and c
+                        r=c;
+                        c=2*c;
+                }
+                else{
+                        break;
+                }
+                c++;
+        }
+}
+
+void pcb_swap(PCB *p1,PCB *p2){
+        PCB *temp=malloc(sizeof(struct PCB));
+        if(temp==NULL){
+                printf("out of space!\n");
+                return;
+        }
+        temp->p_id=p1->p_id;
+        temp->p_requireTime=p1->p_requireTime;
+        temp->p_priority=p1->p_priority;
+        temp->p_state=p1->p_state;
+
+        p1->p_id=p2->p_id;
+        p1->p_requireTime=p2->p_requireTime;
+        p1->p_priority=p2->p_priority;
+        p1->p_state=p2->p_state;
+
+        p2->p_id=temp->p_id;
+        p2->p_requireTime=temp->p_requireTime;
+        p2->p_priority=temp->p_priority;
+        p2->p_state=temp->p_state;
+}
 int main(){
         priority_queue queue=initialize_queue(5);
-     //   printf("%d",queue->pcb_array[0].p_id);
-     //   heap_insert(queue,1,3,2,'R');
-     //   pcb_lessen(&queue->pcb_array[1]);
         init_heap_data(queue);
+        PCB *pcb_toRun=&queue->pcb_array[1];//get the next PCB to run, always get the one with biggest priority(pcb_array[1])
+        while(pcb_toRun->p_requireTime!=0){
+                //run
+                usleep(3000);
+                pcb_lessen(pcb_toRun);
+                //first method:1.delete old pcb,2.insert new pcb
+                //second method:reconstruct heap
+                reconstruct_heap(queue);
+               // pcb_toRun=&queue->pcb_array[1];
+                pcb_toRun=&queue->pcb_array[1];
+        }
         return 0;
 }
