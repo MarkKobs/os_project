@@ -124,12 +124,7 @@ void init_heap_data(priority_queue const H){
                 heap_insert(H,id[i],requireTime[i],priority[i],state[i]);
         }
         printf("Initialized - -!\n");
-                /*
-        for(int i=0;i<H->capacity;i++){
-                pcb_print(id[i],requireTime[i],priority[i],state[i]);}*/
-
         heap_print(H);
-        
 }
 
 void heap_print(priority_queue const H){
@@ -203,23 +198,6 @@ void pcb_swap(PCB *p1,PCB *p2){
                 printf("out of space!\n");
                 return;
         }
-        /*
-        temp->p_id=p1->p_id;
-        temp->p_requireTime=p1->p_requireTime;
-        temp->p_priority=p1->p_priority;
-        temp->p_state=p1->p_state;
-
-        p1->p_id=p2->p_id;
-        p1->p_requireTime=p2->p_requireTime;
-        p1->p_priority=p2->p_priority;
-        p1->p_state=p2->p_state;
-
-        p2->p_id=temp->p_id;
-        p2->p_requireTime=temp->p_requireTime;
-        p2->p_priority=temp->p_priority;
-        p2->p_state=temp->p_state;
-        */
-        /*Simpler*/
         *temp=*p1;
         *p1=*p2;
         *p2=*temp;
