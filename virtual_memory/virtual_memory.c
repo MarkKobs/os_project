@@ -102,22 +102,32 @@ int isInMemory(PageTable pt,int page_number){//page number from 0 to 6
         Page page=pt->page_list+page_number;
         return page->flag;
 }
+/*形成绝对地址*/
+int position_transformation(PageTable pt,InstructionSequence is){
+        int pg=is->page_number;
+        int un=is->unit_number;
+        int bn=pt->page_list[pg].block_number;
+        /* absolute path = bn x 128 + un*/
+        int absolute=bn*128+un;
 
+        return absolute;
+}
 
 int main(int argc,char **argv){
         InstructionSequence seq=init_instruction();//an array actually
         PageTable pt=init_page_table();
-        print_page(pt->page_list);
         /*实现模拟执行流程*/
         for(int i=0;i<OPERATION;i++){
                 int page_number=((InstructionSequence)&seq[i])->page_number;
-                printf("%d\n",page_number);
                 if(isInMemory(pt,page_number)){
                         /*形成绝对地址*/
+                        int absolute=position_transformation(pt,(InstructionSequence)&seq[i]);
+                        printf("%d\n",absolute);
+
                 }
                 else{
                         /*输出缺页号*/
-                        printf("* %d",page_number);
+                        printf("* %d\n",page_number);
                 }
         }
         return 0;
