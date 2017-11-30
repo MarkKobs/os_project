@@ -87,13 +87,20 @@ PageTable init_page_table(){
         init_page(pt->page_list+6,6,0,0,121);
         return pt;
 }
-
+/*打印函数*/
 void print_instruction(InstructionSequence is){
         printf("%c %d %d\n",is->operation_type,is->page_number,is->unit_number);
 }
 void print_page(Page onePage){
         printf("%d %d %d %d\n",onePage->page_number,onePage->flag,onePage->block_number,onePage->position_in_disk);
 }
+/*page函数*/
+int isInMemory(PageTable pt,int page_number){//page number from 0 to 6 
+        Page page=pt->page_list+page_number;
+        return page->flag;
+}
+
+
 int main(int argc,char **argv){
         InstructionSequence iSequence=init_instruction();
         PageTable pTable=init_page_table();
