@@ -64,6 +64,12 @@ InstructionSequence init_instruction(){
         return instructionSequence;
 
 }
+void init_page(Page p,int p_n,int f,int b_n,int p_i_d){
+        p->page_number=p_n;
+        p->flag=f;
+        p->block_number=b_n;
+        p->position_in_disk=p_i_d;
+}
 PageTable init_page_table(){
         PageTable pt=(PageTable)malloc(sizeof(struct page_table));
         if(pt==NULL){
@@ -71,13 +77,26 @@ PageTable init_page_table(){
         }
         pt->capacity=PAGES;
         pt->size=INIT_SIZE;
-        pt->page_list=malloc(pt->capacity*sizeof(struct page));//default page list has 7 pages
+        pt->page_list=(Page)malloc(pt->capacity*sizeof(struct page));//default page list has 7 pages ,array
+        init_page(pt->page_list,0,1,5,11);
+        init_page(pt->page_list+1,1,1,8,12);
+        init_page(pt->page_list+2,2,1,9,13);
+        init_page(pt->page_list+3,3,1,1,21);
+        init_page(pt->page_list+4,4,0,0,22);
+        init_page(pt->page_list+5,5,0,0,23);
+        init_page(pt->page_list+6,6,0,0,121);
+        return pt;
 }
 
 void print_instruction(InstructionSequence is){
         printf("%c %d %d\n",is->operation_type,is->page_number,is->unit_number);
 }
+void print_page(Page onePage){
+        printf("%d %d %d %d\n",onePage->page_number,onePage->flag,onePage->block_number,onePage->position_in_disk);
+}
 int main(int argc,char **argv){
         InstructionSequence iSequence=init_instruction();
+        PageTable pTable=init_page_table();
+        print_page(pTable->page_list);
         return 0;
 }
