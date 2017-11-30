@@ -78,6 +78,9 @@ PageTable init_page_table(){
         pt->capacity=PAGES;
         pt->size=INIT_SIZE;
         pt->page_list=(Page)malloc(pt->capacity*sizeof(struct page));//default page list has 7 pages ,array
+        if(pt->page_list==NULL){
+                printf("out of space!\n");
+        }
         init_page(pt->page_list,0,1,5,11);
         init_page(pt->page_list+1,1,1,8,12);
         init_page(pt->page_list+2,2,1,9,13);
@@ -102,8 +105,20 @@ int isInMemory(PageTable pt,int page_number){//page number from 0 to 6
 
 
 int main(int argc,char **argv){
-        InstructionSequence iSequence=init_instruction();
-        PageTable pTable=init_page_table();
-        print_page(pTable->page_list);
+        InstructionSequence seq=init_instruction();//an array actually
+        PageTable pt=init_page_table();
+        print_page(pt->page_list);
+        /*实现模拟执行流程*/
+        for(int i=0;i<OPERATION;i++){
+                int page_number=((InstructionSequence)&seq[i])->page_number;
+                printf("%d\n",page_number);
+                if(isInMemory(pt,page_number)){
+                        /*形成绝对地址*/
+                }
+                else{
+                        /*输出缺页号*/
+                        printf("* %d",page_number);
+                }
+        }
         return 0;
 }
