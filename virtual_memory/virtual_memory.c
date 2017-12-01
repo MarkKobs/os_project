@@ -19,6 +19,7 @@ typedef struct page *Page;
 typedef struct page_table *PageTable;
 typedef struct instruction_sequence *InstructionSequence;
 int main(int argc,char **argv);
+void print_page(Page page);
 struct page{
         int page_number;
         int flag;//flag=1 in MM, flag=0 not in MM
@@ -69,6 +70,7 @@ void init_page(Page p,int p_n,int f,int b_n,int p_i_d){
         p->flag=f;
         p->block_number=b_n;
         p->position_in_disk=p_i_d;
+        print_page(p);
 }
 PageTable init_page_table(){
         PageTable pt=(PageTable)malloc(sizeof(struct page_table));
@@ -81,6 +83,8 @@ PageTable init_page_table(){
         if(pt->page_list==NULL){
                 printf("out of space!\n");
         }
+        printf("the page initialized:\n");
+        printf("page|flag|block|disk position\n ");
         init_page(pt->page_list,0,1,5,11);
         init_page(pt->page_list+1,1,1,8,12);
         init_page(pt->page_list+2,2,1,9,13);
@@ -119,6 +123,7 @@ int main(int argc,char **argv){
         /*实现模拟执行流程*/
         for(int i=0;i<OPERATION;i++){
                 int page_number=((InstructionSequence)&seq[i])->page_number;
+                printf("read instruction %d:%c\n",i+1,seq[i].operation_type);
                 if(isInMemory(pt,page_number)){
                         /*形成绝对地址*/
                         int absolute=position_transformation(pt,(InstructionSequence)&seq[i]);
