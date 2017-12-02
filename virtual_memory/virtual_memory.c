@@ -1,15 +1,18 @@
-/* Project Name:Virtual Memory
+/* Project Name:use Fifo to deal with missing page inter
  * Date:2017.11.29
  * Author:Mark Kobs
- * 内容：模拟分页式虚拟存储管理中的地址转化和缺页中断，
- * 以及选择页面调度算法处理缺页中断
- * 页表的格式为 |页号|标志位|主存块号|在磁盘上的位置|(页号与主存块号之间一一映射)
- * 其中：标志位1表示对应页已经装入内存，0表示该页未装入内存
- * 主存块号：用来标志装入内存的页所占的块号
- * 在磁盘上的位置：表示页在磁盘上的位置
- *
- * */
-
+ * content:the program is the simulation of virtual storage management based on pagination,
+ * and choose one proper type of page schedualing program to deal with the page interruption.
+ * Here, we choose algorithm FIFO.
+ * the format of the page  |page number|flag|Main memory block number|position in disk|
+ * flag:1 means the page is in the MM(main memory),0 - not in.
+ * block number：the place to find the page on MM.
+ * the postion in disk: the place to find the page in disk.
+ * 
+ * When we choose the Algorithm FIFO,we have to construct it with circle queue , there are two 
+ * solutions, one is array ,the other is linklist, here is using the array.
+ * 
+ * * */
 #include<stdlib.h>
 #include<stdio.h>
 #define OPERATION 12
@@ -94,19 +97,16 @@ PageTable init_page_table(){
         init_page(pt->page_list+6,6,0,0,121);
         return pt;
 }
-/*打印函数*/
 void print_instruction(InstructionSequence is){
         printf("%c %d %d\n",is->operation_type,is->page_number,is->unit_number);
 }
 void print_page(Page onePage){
         printf("%d %d %d %d\n",onePage->page_number,onePage->flag,onePage->block_number,onePage->position_in_disk);
 }
-/*page函数*/
 int isInMemory(PageTable pt,int page_number){//page number from 0 to 6 
         Page page=pt->page_list+page_number;
         return page->flag;
 }
-/*形成绝对地址*/
 int position_transformation(PageTable pt,InstructionSequence is){
         int pg=is->page_number;
         int un=is->unit_number;
@@ -120,18 +120,18 @@ int position_transformation(PageTable pt,InstructionSequence is){
 int main(int argc,char **argv){
         InstructionSequence seq=init_instruction();//an array actually
         PageTable pt=init_page_table();
-        /*实现模拟执行流程*/
+        /*simulate*/
         for(int i=0;i<OPERATION;i++){
                 int page_number=((InstructionSequence)&seq[i])->page_number;
                 printf("read instruction %d:%c\n",i+1,seq[i].operation_type);
                 if(isInMemory(pt,page_number)){
-                        /*形成绝对地址*/
+                        /*absolute path*/
                         int absolute=position_transformation(pt,(InstructionSequence)&seq[i]);
                         printf("%d\n",absolute);
 
                 }
                 else{
-                        /*输出缺页号*/
+                        /*output the interruption*/
                         printf("* %d\n",page_number);
                 }
         }
