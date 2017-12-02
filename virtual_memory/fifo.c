@@ -82,7 +82,7 @@ void print_queue(Queue q){
                                 printf("%d ",q->array[q->size+q->k-q->capacity]);
                         } 
                 }
-                       printf("\n"); 
+                       printf("\n\n"); 
         }
 }
 static int succ(int value,Queue q){//进位
@@ -172,6 +172,7 @@ PageTable init_page_table(){
         init_page(pt->page_list+4,4,0,0,0,22);
         init_page(pt->page_list+5,5,0,0,0,23);
         init_page(pt->page_list+6,6,0,0,0,121);
+        printf("\n");
         return pt;
 }
 /*打印函数*/
@@ -209,17 +210,17 @@ void setFlagToOne(PageTable pt,int page_number){
         
 }
 void process_interruption(){//处理中断程序
-//TODO
+        printf("缺页中断处理\n");
 } 
 int main(int argc,char **argv){
         InstructionSequence seq=init_instruction();//an array actually
         PageTable pt=init_page_table();
-        Queue queue=createQueue(7);
+        Queue queue=createQueue(4);
         print_queue(queue);
         /*实现模拟FIFO执行流程*/
         for(int i=0;i<OPERATION;i++){
                 int page_number=((InstructionSequence)&seq[i])->page_number;
-                printf("read instruction %d:%c\n",i+1,seq[i].operation_type);//read an instruction
+                printf("read instruction %d:%c require page %d\n",i+1,seq[i].operation_type,seq[i].page_number);//read an instruction
                 if(isInMemory(pt,page_number)){
                         /*形成绝对地址*/
                         int absolute=position_transformation(pt,(InstructionSequence)&seq[i]);
