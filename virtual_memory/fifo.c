@@ -1,15 +1,16 @@
 /* Project Name:use Fifo to deal with missing page inter
  * Date:2017.12.1
  * Author:Mark Kobs
- * 内容：模拟分页式虚拟存储管理中的地址转化和缺页中断，
- * 以及选择页面调度算法处理缺页中断,这里主要是实现FIFO调度算法处理缺页中断。
- * 页表的格式为 |页号|标志位|主存块号|在磁盘上的位置|(页号与主存块号之间一一映射)
- * 其中：标志位1表示对应页已经装入内存，0表示该页未装入内存
- * 主存块号：用来标志装入内存的页所占的块号
- * 在磁盘上的位置：表示页在磁盘上的位置
+ * content:the program is the simulation of virtual storage management based on pagination,
+ * and choose one proper type of page schedualing program to deal with the page interruption.
+ * Here, we choose algorithm FIFO.
+ * the format of the page  |page number|flag|Main memory block number|position in disk|
+ * flag:1 means the page is in the MM(main memory),0 - not in.
+ * block number：the place to find the page on MM.
+ * the postion in disk: the place to find the page in disk.
  * 
- * 在实现FIFO的时候务必会用到队列知识，这里用了循环队列的处理方法
- * 但是在循环队列的基础上，需要用到遍历数组的算法，算法复杂度为O(n)
+ * When we choose the Algorithm FIFO,we have to construct it with circle queue , there are two 
+ * solutions, one is array ,the other is linklist, here is using the array.
  * */
 
 #include<stdlib.h>
@@ -28,7 +29,7 @@ struct page{
         int page_number;
         int flag;//flag=1 in MM, flag=0 not in MM
         int block_number;
-        int change;//表示是否修改过
+        int change;//state that the page has been changed or not
         int position_in_disk;
 
 };
@@ -114,7 +115,7 @@ int Dequeue(Queue q){
 }
 void Enqueue(int x,Queue q){
         if(isFull(q)){
-                printf("%d -----> %d\n",q->array[q->k],x);//原先是array
+                printf("%d -----> %d\n",q->array[q->k],x);
                 q->k=x;
                 q->k++;
                 
@@ -171,8 +172,8 @@ PageTable init_page_table(){
         if(pt->page_list==NULL){
                 printf("out of space!\n");
         }
-        printf("初始化:\n");
-        printf("page|flag|block|change|disk position\n ");//默认修改位都为0
+        printf("Initialize:\n");
+        printf("page|flag|block|change|disk position\n ");//default all zero
         init_page(pt->page_list,0,1,5,0,11);
         init_page(pt->page_list+1,1,1,8,0,12);
         init_page(pt->page_list+2,2,1,9,0,13);
@@ -183,19 +184,18 @@ PageTable init_page_table(){
         printf("\n");
         return pt;
 }
-/*打印函数*/
+/*print funtion*/
 void print_instruction(InstructionSequence is){
         printf("%c %d %d\n",is->operation_type,is->page_number,is->unit_number);
 }
 void print_page(Page onePage){
         printf("%d %d %d %d %d\n",onePage->page_number,onePage->flag,onePage->block_number,onePage->change,onePage->position_in_disk);
 }
-/*page函数*/
 int isInMemory(PageTable pt,int page_number){//page number from 0 to 6 
         Page page=pt->page_list+page_number;
         return page->flag;
 }
-/*形成绝对地址*/
+/*absolute transformation*/
 int position_transformation(PageTable pt,InstructionSequence is){
         int pg=is->page_number;
         int un=is->unit_number;
@@ -217,10 +217,10 @@ void setFlagToOne(PageTable pt,int page_number){
         pt->page_list[page_number].flag=1;
         
 }
-void process_interruption(Queue q,PageTable pt,int x){//处理中断程序
-        printf("缺页中断处理\n");
+void process_interruption(Queue q,PageTable pt,int x){//deal with the interruption
+        printf("Deal the the page interruption\n");
         int page_tobe_delete=Dequeue(q);
-        if(pt->page_list[page_tobe_delete].change==1){//修改过，则要存到磁盘上，并清0,这里模拟就省去存磁盘的过程
+        if(pt->page_list[page_tobe_delete].change==1){//changed
                 pt->page_list[page_tobe_delete].flag=0;
                 pt->page_list[page_tobe_delete].block_number=0;
                 pt->page_list[page_tobe_delete].change=0;
@@ -236,25 +236,25 @@ int main(int argc,char **argv){
         PageTable pt=init_page_table();
         Queue queue=createQueue(4);
         print_queue(queue);
-        /*实现模拟FIFO执行流程*/
+        /*FIFO function*/
         for(int i=0;i<OPERATION;i++){
                 int page_number=((InstructionSequence)&seq[i])->page_number;
                 printf("read instruction %d:%c require page %d\n",i+1,seq[i].operation_type,seq[i].page_number);//read an instruction
                 if(isInMemory(pt,page_number)){
-                        /*形成绝对地址*/
+                        /*format absolute path*/
                         int absolute=position_transformation(pt,(InstructionSequence)&seq[i]);
                         printf("%d\n",absolute);
-                        if(isStore((InstructionSequence)&seq[i])){//写操作
-                                /*置该页修改标志为1*/
+                        if(isStore((InstructionSequence)&seq[i])){//read 
+                                /*place the change state to 1*/
                                 pt->page_list[page_number].change=1;
                                 printf("%d changed!\n",page_number);
                         }
 
                 }
                 else{
-                        /*缺页中断处理*/
+                        /*deal the page interruption*/
                         process_interruption(queue,pt,seq[i].page_number); 
-                        /*输出缺页号*/
+                        /*interruptional page print out*/
                         printf("* %d\n",page_number);
                 }
         }
