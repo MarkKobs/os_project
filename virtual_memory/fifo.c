@@ -58,7 +58,7 @@ Queue createQueue(int length){
       q->size=0;
       q->k=0;
       q->rear=-1;
-      for(int i=0;i<4;i++){
+      for(int i=0;i<q->capacity;i++){
               q->array[i]=i;
               q->size++;
               q->rear++;
@@ -78,18 +78,12 @@ void print_queue(Queue q){
                         }
                 }
                 else{//k>rear
-                        for(int i=q->k;i<q->size;i++){
-                                printf("%d ",q->array[q->size+q->k-q->capacity]);
+                        for(int i=q->k;i<q->k+q->size;i++){
+                                printf("%d ",q->array[i%q->capacity]);
                         } 
                 }
                        printf("\n\n"); 
         }
-}
-static int succ(int value,Queue q){//进位
-        if(++value==q->capacity){
-                value=0;
-        }
-        return value;
 }
 int isEmpty(Queue q){
         return q->size==0;
@@ -105,16 +99,30 @@ int pageIsInArray(int page_number,int *array,int array_length){
         }
         return 0;
 }
-void Enqueue(int x,Queue q){//队列中存放的实际上是页表，x就是要插入的页表
-        if(isFull(q)){//满了，就要调出，再将指令中的页号x插入调出的位置
+int Dequeue(Queue q){
+        if(isEmpty(q)){
+                printf("empty!\n");
+                exit(1);
+        }
+        else{
+                q->size--;
+                int page_number=q->array[q->k];
+                q->k=(q->k+1)%q->capacity;
+                printf("%d dequeue\n",page_number);
+                return page_number;
+        }
+}
+void Enqueue(int x,Queue q){
+        if(isFull(q)){
                 printf("%d -----> %d\n",q->array[q->k],x);//原先是array
                 q->k=x;
                 q->k++;
                 
         }
         else{
+                printf("%d enqueue\n",x);
                 q->size++;
-                q->rear=succ(q->rear,q);
+                q->rear=(q->rear+1)%q->capacity;
                 q->array[q->rear]=x;
         }
 }
@@ -209,8 +217,19 @@ void setFlagToOne(PageTable pt,int page_number){
         pt->page_list[page_number].flag=1;
         
 }
-void process_interruption(){//处理中断程序
+void process_interruption(Queue q,PageTable pt,int x){//处理中断程序
         printf("缺页中断处理\n");
+        int page_tobe_delete=Dequeue(q);
+        if(pt->page_list[page_tobe_delete].change==1){//修改过，则要存到磁盘上，并清0,这里模拟就省去存磁盘的过程
+                pt->page_list[page_tobe_delete].flag=0;
+                pt->page_list[page_tobe_delete].block_number=0;
+                pt->page_list[page_tobe_delete].change=0;
+        }
+        pt->page_list[page_tobe_delete].flag=0;
+        Enqueue(x,q);
+        pt->page_list[x].flag=1;
+        print_queue(q);
+        
 } 
 int main(int argc,char **argv){
         InstructionSequence seq=init_instruction();//an array actually
@@ -234,7 +253,7 @@ int main(int argc,char **argv){
                 }
                 else{
                         /*缺页中断处理*/
-                        process_interruption();                   
+                        process_interruption(queue,pt,seq[i].page_number); 
                         /*输出缺页号*/
                         printf("* %d\n",page_number);
                 }
