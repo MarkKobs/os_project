@@ -81,8 +81,8 @@ void print_queue(Queue q){
                         for(int i=q->k;i<q->size;i++){
                                 printf("%d ",q->array[q->size+q->k-q->capacity]);
                         } 
-                       printf("\n"); 
                 }
+                       printf("\n"); 
         }
 }
 static int succ(int value,Queue q){//进位
