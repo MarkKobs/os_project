@@ -11,6 +11,7 @@ struct io_node{
         int cylinder_number;
         int track_number;
         int record;
+        char direction;//u:up inward  d:down outward
 };
 struct io_table{
     int size;
@@ -27,10 +28,10 @@ ioTable init_table(){
         return it;
 }
 void print_table(ioTable it){
-        prinf("Here is the request i/o table:\n");
+        printf("Here is the request i/o table:\n");
         for(int i=0;i<it->size;i++){
                 ioNode temp=&(it->io_array[i]);
-                printf("P%d %d %d %d\n",temp->id,temp->cylinder_number,temp->track_number,temp->record);
+                printf("P%d %d %d %d %c\n",temp->id,temp->cylinder_number,temp->track_number,temp->record,temp->direction);
         }
 }
 /*get random number:1 or 0*/
@@ -53,7 +54,7 @@ void receive(ioTable it){
         }
         ioNode in=&it->io_array[it->size];
         printf("++++++++++++++++++++receive the requset++++++++++++++++++++\n");
-        scanf("%d %d %d %d",&in->id,&in->cylinder_number,&in->track_number,&in->record);
+        scanf("%d %d %d %d %c",&in->id,&in->cylinder_number,&in->track_number,&in->record,&in->direction);
         getchar();
         it->size++;
         print_table(it);
