@@ -117,9 +117,10 @@ void print_node(ioNode in){
         printf("P%d %d %d %d %c\n",in->id,in->cylinder_number,in->track_number,in->record,in->direction);
 }
 void schedual(ioTable it){
-        printf("**********************drive schedualing**********************\n");
+       // printf("**********************drive schedualing**********************\n");
         if(isEmpty(it)){
-                printf("the I/O table NULL!\n");
+                //printf("the I/O table NULL!\n");
+                return;
         }
         else{
                 int shortest=32000;
@@ -173,7 +174,7 @@ static void print_current(ioTable it){
 void receive(ioTable it){
         if(isFull(it)){
                 printf("the table is full! wait for the drive process\n");
-                return;
+                exit(-1);
         }
         ioNode in=&it->io_array[it->size];
         printf("++++++++++++++++++++receive the requset++++++++++++++++++++\n");
@@ -196,9 +197,9 @@ int main(int argc,char **argv){
                 	receive(it);
         	}
 		
-            printf("continue ? input y or Y if you want to continue, or any other key to stop now\n");
-            hint=getchar();
-            getchar();//read the return 
+           // printf("continue ? input y or Y if you want to continue, or any other key to stop now\n");
+           // hint=getchar();
+           // getchar();//read the return 
             time++;
             ran=get_random();
         }
