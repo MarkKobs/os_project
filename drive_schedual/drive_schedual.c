@@ -14,6 +14,7 @@ struct io_node{
 };
 struct io_table{
     int size;
+    int capacity;
     ioNode io_array;
 };
 
@@ -22,12 +23,14 @@ ioTable init_table(){
         ioTable it=(ioTable)malloc(sizeof(struct io_table));
         it->io_array=(ioNode)malloc(sizeof(struct io_node)*CAPACITY);
         it->size=0;
+        it->capacity=CAPACITY;
         return it;
 }
 void print_table(ioTable it){
+        prinf("Here is the request i/o table:\n");
         for(int i=0;i<it->size;i++){
-                
-                printf("P%d %d %d %d\n",it->io_array[i]);
+                ioNode temp=&(it->io_array[i]);
+                printf("P%d %d %d %d\n",temp->id,temp->cylinder_number,temp->track_number,temp->record);
         }
 }
 /*get random number:1 or 0*/
@@ -38,11 +41,24 @@ int get_random(){
 
 
 void schedual(){
-        printf("drive schedualing\n");
+        printf("**********************drive schedualing**********************\n");
 }
+int isFull(ioTable it){
+        return it->size==it->capacity;
+}
+void receive(ioTable it){
+        if(isFull(it)){
+                printf("the table is full! wait for the drive process\n");
+                return;
+        }
+        ioNode in=&it->io_array[it->size];
+        printf("++++++++++++++++++++receive the requset++++++++++++++++++++\n");
+        scanf("%d %d %d %d",&in->id,&in->cylinder_number,&in->track_number,&in->record);
+        getchar();
+        it->size++;
+        print_table(it);
 
-void receive(){
-        printf("receive the requset\n");
+       
 }
 int main(int argc,char **argv){
         int ran=get_random();
@@ -54,14 +70,14 @@ int main(int argc,char **argv){
                 	schedual();
         	}
         	else{
-                	receive();
+                	receive(it);
         	}
 		
             printf("continue ? input y or Y if you want to continue, or any other key to stop now\n");
             hint=getchar();
             getchar();//read the return 
-            printf("%c\n",hint);
             time++;
+            ran=get_random();
         }
         
         return 0;
